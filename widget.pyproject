@@ -1,0 +1,3 @@
+{
+    "files": ["widget.py","ota_from_target_files.py","common.py","sparse_img.py","edify_generator.py","blockimgdiff.py","rangelib.py"]
+}
