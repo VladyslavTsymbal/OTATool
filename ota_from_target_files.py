@@ -2401,6 +2401,7 @@ def main(argv):
 def startBuildingIncrementalOta(str):
     try:
         common.CloseInheritedPipes()
+        #print(str)
         main(str)
     except common.ExternalError as e:
         print

@@ -1,16 +1,27 @@
 import sys
 from pathlib import Path
-from threading import Thread
 
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QSpacerItem, QTextEdit
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QMessageBox, QDesktopWidget, QFileDialog
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QStandardPaths, QSize, QFileInfo
+from PyQt5.QtCore import QStandardPaths, QSize, QFileInfo, QThread, QObject
 
 from ota_from_target_files import startBuildingIncrementalOta
 
 first_tf_path  = ""
 second_tf_path = ""
+
+class BuildingOTAWorker(QObject):
+
+    def __init__(self, opts, parent=None):
+
+        super(BuildingOTAWorker, self).__init__(parent)
+        self.opts = opts
+
+    def run(self):
+
+        startBuildingIncrementalOta(self.opts)
+
 
 class UiWidget(QWidget):
 
@@ -106,28 +117,29 @@ class UiWidget(QWidget):
             filename = Path(second_tf_path).name
             self.second_tf_label.setText(filename)
 
-    def startOTABuilding(self):
-
-        global first_tf_path
-        global second_tf_path
-
-        path_to_output = "/home/vlad/"
-        common_args = "--block -n -v -d MMC -v -p . -m linux_embedded --no_signing -i "
-        #self.text_field.append("Nu ti i huila")
-        outname = path_to_output + self.first_tf_label.text() + "-" + self.second_tf_label.text() + ".zip"
-        #self.text_field.append(common_args + first_tf_path + " " + second_tf_path + " " + outname)
-        #startBuildingIncrementalOta(common_args + first_tf_path + " " + second_tf_path + " " + outname)
-        execstr = '--block', '-n', '-v', '-d', 'MMC', '-v', '-p', '.', '-m', 'linux_embedded', '--no_signing', '-i', '/home/vlad/target_files/tf-motocaddy-m5-AL-SAR09A02-1.12.3_debug_1.4.7.zip', '/home/vlad/target_files/tf-motocaddy-m5-AL-SAR09A02-1.12.4_debug_1.4.7.zip', '/home/vlad/target_files/tf-motocaddy-m5-AL-SAR09A02-1.12.3_debug_1.4.7.zip-tf-motocaddy-m5-AL-SAR09A02-1.12.4_debug_1.4.7.zip.zip'
-        startBuildingIncrementalOta(execstr)
-
     def startButtonClicked(self):
 
         global first_tf_path
         global second_tf_path
 
-        #if first_tf_path and second_tf_path:
-        thread = Thread(target = self.startOTABuilding, args = [])
-        thread.start()
+        if first_tf_path and second_tf_path:
+
+            path_to_output = QStandardPaths.writableLocation(QStandardPaths.HomeLocation) + '/'
+            outname = path_to_output + self.first_tf_label.text() + "-" + self.second_tf_label.text() + ".zip"
+            exec_list_options = ['--block', '-n', '-v', '-d', 'MMC', '-v', '-p', '.', '-m', 'linux_embedded', '--no_signing', '-i']
+            exec_list_options.append(first_tf_path)
+            exec_list_options.append(second_tf_path)
+            exec_list_options.append(outname)
+
+            self.thread = QThread()
+            self.worker = BuildingOTAWorker(exec_list_options)
+            self.worker.moveToThread(self.thread)
+            self.thread.started.connect(self.worker.run)
+            #self.worker.finished.connect(self.thread.quit)
+            #self.worker.finished.connect(self.worker.deleteLater)
+            #self.thread.finished.connect(self.thread.deleteLater)
+
+            self.thread.start()
 
 if __name__ == '__main__':
 
