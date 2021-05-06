@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright (C) 2008 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -134,10 +132,6 @@ Usage:  ota_from_target_files [flags] input_target_files output_ota_package
 
 import sys
 
-if sys.hexversion < 0x02070000:
-  print >> sys.stderr, "Python 2.7 or newer is required."
-  sys.exit(1)
-
 import multiprocessing
 import os
 import subprocess
@@ -187,7 +181,7 @@ OPTIONS.payload_signer_args = []
 def MostPopularKey(d, default):
   """Given a dict, return the key corresponding to the largest
   value.  Returns 'default' if the dict is empty."""
-  x = [(v, k) for (k, v) in d.items()]
+  x = [(v, k) for (k, v) in list(d.items())]
   if not x:
     return default
 
@@ -312,14 +306,14 @@ class Item(object):
 
   def Dump(self, indent=0):
     if self.uid is not None:
-      print ("%s%s %d %d %o" % (
-          "  " * indent, self.name, self.uid, self.gid, self.mode))
+      print(("%s%s %d %d %o" % (
+          "  " * indent, self.name, self.uid, self.gid, self.mode)))
     else:
-      print ("%s%s %s %s %s" % (
-          "  " * indent, self.name, self.uid, self.gid, self.mode))
+      print(("%s%s %s %s %s" % (
+          "  " * indent, self.name, self.uid, self.gid, self.mode)))
     if self.is_dir:
-      print ("%s%s" % ("  "*indent, self.descendants))
-      print ("%s%s" % ("  "*indent, self.best_subtree))
+      print(("%s%s" % ("  "*indent, self.descendants)))
+      print(("%s%s" % ("  "*indent, self.best_subtree)))
       for i in self.children:
         i.Dump(indent=indent+1)
 
@@ -343,7 +337,7 @@ class Item(object):
     d = self.descendants
     for i in self.children:
       if i.is_dir:
-        for k, v in i.CountChildMetadata().items():
+        for k, v in list(i.CountChildMetadata().items()):
           d[k] = d.get(k, 0) + v
       else:
         k = (i.uid, i.gid, None, i.mode, i.selabel, i.capabilities)
@@ -355,7 +349,7 @@ class Item(object):
     # First, find the (uid, gid) pair that matches the most
     # descendants.
     ug = {}
-    for (uid, gid, _, _, _, _), count in d.items():
+    for (uid, gid, _, _, _, _), count in list(d.items()):
       ug[(uid, gid)] = ug.get((uid, gid), 0) + count
     ug = MostPopularKey(ug, (0, 0))
 
@@ -365,7 +359,7 @@ class Item(object):
     best_fmode = (0, 0o644)
     best_selabel = (0, None)
     best_capabilities = (0, None)
-    for k, count in d.items():
+    for k, count in list(d.items()):
       if k[:2] != ug:
         continue
       if k[2] is not None and count >= best_dmode[0]:
@@ -519,8 +513,8 @@ def _WriteRecoveryImageToBoot(script, output_zip):
         OPTIONS.input_tmp, "RECOVERY")
     common.ZipWriteStr(
         output_zip, recovery_two_step_img_name, recovery_two_step_img.data)
-    print ("two-step package: using %s in stage 1/3" % (
-        recovery_two_step_img_name,))
+    print(("two-step package: using %s in stage 1/3" % (
+        recovery_two_step_img_name,)))
     script.WriteRawImage("/boot", recovery_two_step_img_name)
   else:
     print ("two-step package: using recovery.img in stage 1/3")
@@ -567,11 +561,11 @@ def GetImage(which, tmpdir, info_dict):
   path = os.path.join(tmpdir, "IMAGES", which + ".img")
   mappath = os.path.join(tmpdir, "IMAGES", which + ".map")
   if os.path.exists(path) and os.path.exists(mappath):
-    print ("using %s.img from target-files" % (which,))
+    print(("using %s.img from target-files" % (which,)))
     # This is a 'new' target-files, which already has the image in it.
 
   else:
-    print ("building %s.img from target-files" % (which,))
+    print(("building %s.img from target-files" % (which,)))
 
     # This is an 'old' target-files, which does not contain images
     # already built.  Build them.
@@ -939,7 +933,7 @@ def WriteBlockIncrementalOTAPackage(target_zip, source_zip, output_zip):
   pre_timestamp = GetBuildProp("ro.build.date.utc", OPTIONS.source_info_dict)
   is_downgrade = False
   if OPTIONS.platform_mode != "linux_embedded":
-      is_downgrade = long(post_timestamp) < long(pre_timestamp)
+      is_downgrade = int(post_timestamp) < int(pre_timestamp)
 
   if OPTIONS.downgrade:
     metadata["ota-downgrade"] = "yes"
@@ -953,9 +947,9 @@ def WriteBlockIncrementalOTAPackage(target_zip, source_zip, output_zip):
       # cut a new build C (after having A and B), but want to enfore the
       # update path of A -> C -> B. Specifying --downgrade may not help since
       # that would enforce a data wipe for C -> B update.
-      print("\nWARNING: downgrade detected: pre: %s, post: %s.\n"
+      print(("\nWARNING: downgrade detected: pre: %s, post: %s.\n"
             "The package may not be deployed properly. "
-            "Try --downgrade?\n" % (pre_timestamp, post_timestamp))
+            "Try --downgrade?\n" % (pre_timestamp, post_timestamp)))
     metadata["post-timestamp"] = post_timestamp
 
   device_specific = common.DeviceSpecificParams(
@@ -1151,8 +1145,8 @@ else if get_stage("%(bcb_dev)s") != "3/3" then
     else:
       include_full_boot = False
 
-      print ("boot      target: %d  source: %d  diff: %d" % (
-          target_boot.size, source_boot.size, len(d)))
+      print(("boot      target: %d  source: %d  diff: %d" % (
+          target_boot.size, source_boot.size, len(d))))
 
       common.ZipWriteStr(output_zip, "patch/boot.img.p", d)
 
@@ -1515,10 +1509,10 @@ class FileDifference(object):
     largest_source_size = 0
 
     matching_file_cache = {}
-    for fn, sf in source_data.items():
+    for fn, sf in list(source_data.items()):
       assert fn == sf.name
       matching_file_cache["path:" + fn] = sf
-      if fn in target_data.keys():
+      if fn in list(target_data.keys()):
         AddToKnownPaths(fn, known_paths)
       # Only allow eligibility for filename/sha matching
       # if there isn't a perfect path match.
@@ -1531,17 +1525,17 @@ class FileDifference(object):
       assert fn == tf.name
       sf = ClosestFileMatch(tf, matching_file_cache, renames)
       if sf is not None and sf.name != tf.name:
-        print ("File has moved from " + sf.name + " to " + tf.name)
+        print(("File has moved from " + sf.name + " to " + tf.name))
         renames[sf.name] = tf
 
       if sf is None or fn in OPTIONS.require_verbatim:
         # This file should be included verbatim
         if fn in OPTIONS.prohibit_verbatim:
           raise common.ExternalError("\"%s\" must be sent verbatim" % (fn,))
-        print ("send", fn, "verbatim")
+        print(("send", fn, "verbatim"))
         tf.AddToZip(output_zip)
         verbatim_targets.append((fn, tf.size, tf.sha1))
-        if fn in target_data.keys():
+        if fn in list(target_data.keys()):
           AddToKnownPaths(fn, known_paths)
       elif tf.sha1 != sf.sha1:
         # File is different; consider sending as a patch
@@ -1625,8 +1619,8 @@ class FileDifference(object):
   def EmitRenames(self, script):
     if len(self.renames) > 0:
       script.Print("Renaming files...")
-      for src, tgt in self.renames.items():
-        print ("Renaming " + src + " to " + tgt.name)
+      for src, tgt in list(self.renames.items()):
+        print(("Renaming " + src + " to " + tgt.name))
         script.RenameFile(src, tgt.name)
 
 
@@ -1669,7 +1663,7 @@ def WriteIncrementalOTAPackage(target_zip, source_zip, output_zip):
   pre_timestamp = GetBuildProp("ro.build.date.utc", OPTIONS.source_info_dict)
   is_downgrade = False
   if OPTIONS.platform_mode != "linux_embedded":
-     is_downgrade = long(post_timestamp) < long(pre_timestamp)
+     is_downgrade = int(post_timestamp) < int(pre_timestamp)
 
   if OPTIONS.downgrade:
     metadata["ota-downgrade"] = "yes"
@@ -1683,9 +1677,9 @@ def WriteIncrementalOTAPackage(target_zip, source_zip, output_zip):
       # cut a new build C (after having A and B), but want to enfore the
       # update path of A -> C -> B. Specifying --downgrade may not help since
       # that would enforce a data wipe for C -> B update.
-      print("\nWARNING: downgrade detected: pre: %s, post: %s.\n"
+      print(("\nWARNING: downgrade detected: pre: %s, post: %s.\n"
             "The package may not be deployed properly. "
-            "Try --downgrade?\n" % (pre_timestamp, post_timestamp))
+            "Try --downgrade?\n" % (pre_timestamp, post_timestamp)))
     metadata["post-timestamp"] = post_timestamp
 
   device_specific = common.DeviceSpecificParams(
@@ -1829,8 +1823,8 @@ else if get_stage("%(bcb_dev)s") != "3/3" then
   if updating_boot and not include_full_boot:
     d = common.Difference(target_boot, source_boot)
     _, _, d = d.ComputePatch()
-    print ("boot      target: %d  source: %d  diff: %d" % (
-        target_boot.size, source_boot.size, len(d)))
+    print(("boot      target: %d  source: %d  diff: %d" % (
+        target_boot.size, source_boot.size, len(d))))
 
     common.ZipWriteStr(output_zip, "patch/boot.img.p", d)
 
@@ -1980,10 +1974,10 @@ else
       replaced_symlinks["/%s" % (i[0],)] = i[2]
 
   if system_diff:
-    for tf in system_diff.renames.values():
+    for tf in list(system_diff.renames.values()):
       replaced_symlinks["/%s" % (tf.name,)] = tf.sha1
   if vendor_diff:
-    for tf in vendor_diff.renames.values():
+    for tf in list(vendor_diff.renames.values()):
       replaced_symlinks["/%s" % (tf.name,)] = tf.sha1
 
   always_delete = []
@@ -2180,7 +2174,7 @@ def main(argv):
       OPTIONS.device_type = a
     elif o in ("-m", "--platform_mode"):
       OPTIONS.platform_mode = a
-      print ('ota platform type %s ' % (OPTIONS.platform_mode))
+      print(('ota platform type %s ' % (OPTIONS.platform_mode)))
     elif o == "--stash_threshold":
       try:
         OPTIONS.stash_threshold = float(a)
@@ -2281,7 +2275,7 @@ def main(argv):
     print ("done.")
     return
 
-  print ('ota platform type %s ' % (OPTIONS.platform_mode))
+  print(('ota platform type %s ' % (OPTIONS.platform_mode)))
 
   if OPTIONS.extra_script is not None:
     OPTIONS.extra_script = open(OPTIONS.extra_script).read()
@@ -2404,9 +2398,9 @@ def startBuildingIncrementalOta(str):
         #print(str)
         main(str)
     except common.ExternalError as e:
-        print
-        print ("   ERROR: %s" % (e,))
-        print
+        print()
+        print(("   ERROR: %s" % (e,)))
+        print()
         sys.exit(1)
     finally:
         common.Cleanup()

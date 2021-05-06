@@ -113,7 +113,7 @@ def Run(args, **kwargs):
   """Create and return a subprocess.Popen object, printing the command
   line on the terminal if -v was specified."""
   if OPTIONS.verbose:
-    print ("  running: ", " ".join(args))
+    print(("  running: ", " ".join(args)))
   return subprocess.Popen(args, **kwargs)
 
 
@@ -220,8 +220,8 @@ def LoadInfoDict(input_file, input_dir=None):
       if os.path.exists(system_base_fs_file):
         d["system_base_fs_file"] = system_base_fs_file
       else:
-        print ("Warning: failed to find system base fs file: %s" % (
-            system_base_fs_file,))
+        print(("Warning: failed to find system base fs file: %s" % (
+            system_base_fs_file,)))
         del d["system_base_fs_file"]
 
     if "vendor_base_fs_file" in d:
@@ -230,8 +230,8 @@ def LoadInfoDict(input_file, input_dir=None):
       if os.path.exists(vendor_base_fs_file):
         d["vendor_base_fs_file"] = vendor_base_fs_file
       else:
-        print ("Warning: failed to find vendor base fs file: %s" % (
-            vendor_base_fs_file,))
+        print(("Warning: failed to find vendor base fs file: %s" % (
+            vendor_base_fs_file,)))
         del d["vendor_base_fs_file"]
 
   try:
@@ -282,7 +282,7 @@ def LoadBuildProp(read_helper):
   try:
     data = read_helper("SYSTEM/build.prop")
   except KeyError:
-    print ("Warning: could not find SYSTEM/build.prop in %s" % zip)
+    print(("Warning: could not find SYSTEM/build.prop in %s" % zip))
     data = ""
   return LoadDictionaryFromLines(data.decode().split("\n"))
 
@@ -313,7 +313,7 @@ def LoadRecoveryFSTab(read_helper, fstab_version, recovery_fstab_path,
       recovery_fstab_path = "RECOVERY/recovery.fstab"
     data = read_helper(recovery_fstab_path)
   except KeyError:
-    print ("Warning: could not find {}".format(recovery_fstab_path))
+    print(("Warning: could not find {}".format(recovery_fstab_path)))
     data = ""
 
   if fstab_version == 1:
@@ -345,7 +345,7 @@ def LoadRecoveryFSTab(read_helper, fstab_version, recovery_fstab_path,
           if i.startswith("length="):
             length = int(i[7:])
           else:
-            print ("%s: unknown option \"%s\"" % (mount_point, i))
+            print(("%s: unknown option \"%s\"" % (mount_point, i)))
 
       d[mount_point] = Partition(mount_point=mount_point, fs_type=pieces[1],
                                  device=pieces[2], length=length,
@@ -396,14 +396,14 @@ def LoadRecoveryFSTab(read_helper, fstab_version, recovery_fstab_path,
   # system. Other areas assume system is always at "/system" so point /system
   # at /.
   if system_root_image:
-    assert not d.has_key("/system") and d.has_key("/")
+    assert "/system" not in d and "/" in d
     d["/system"] = d["/"]
   return d
 
 
 def DumpInfoDict(d):
   for k, v in sorted(d.items()):
-    print ("%-25s = (%s) %s" % (k, type(v).__name__, v))
+    print(("%-25s = (%s) %s" % (k, type(v).__name__, v)))
 
 
 def _BuildBootableImage(sourcedir, fs_config_file, info_dict=None,
@@ -554,15 +554,15 @@ def GetBootableImage(name, prebuilt_name, unpack_dir, tree_subdir,
 
   prebuilt_path = os.path.join(unpack_dir, "BOOTABLE_IMAGES", prebuilt_name)
   if os.path.exists(prebuilt_path):
-    print ("using prebuilt %s from BOOTABLE_IMAGES..." % (prebuilt_name,))
+    print(("using prebuilt %s from BOOTABLE_IMAGES..." % (prebuilt_name,)))
     return File.FromLocalFile(name, prebuilt_path)
 
   prebuilt_path = os.path.join(unpack_dir, "IMAGES", prebuilt_name)
   if os.path.exists(prebuilt_path):
-    print ("using prebuilt %s from IMAGES..." % (prebuilt_name,))
+    print(("using prebuilt %s from IMAGES..." % (prebuilt_name,)))
     return File.FromLocalFile(name, prebuilt_path)
 
-  print ("building image from target_files %s..." % (tree_subdir,))
+  print(("building image from target_files %s..." % (tree_subdir,)))
 
   if info_dict is None:
     info_dict = OPTIONS.info_dict
@@ -785,11 +785,11 @@ def CheckSize(data, target, info_dict):
   if pct >= 99.0:
     raise ExternalError(msg)
   elif pct >= 95.0:
-    print
-    print ("  WARNING: ", msg)
-    print
+    print()
+    print(("  WARNING: ", msg))
+    print()
   elif OPTIONS.verbose:
-    print ("  ", msg)
+    print(("  ", msg))
 
 
 def ReadApkCerts(tf_zip):
@@ -838,7 +838,7 @@ COMMON_DOCSTRING = """
 """
 
 def Usage(docstring):
-  print (docstring.rstrip("\n"))
+  print((docstring.rstrip("\n")))
   print (COMMON_DOCSTRING)
 
 
@@ -864,7 +864,7 @@ def ParseOptions(argv,
         list(extra_long_opts))
   except getopt.GetoptError as err:
     Usage(docstring)
-    print ("**", str(err), "**")
+    print(("**", str(err), "**"))
     sys.exit(2)
 
   for o, a in opts:
@@ -904,7 +904,7 @@ def ParseOptions(argv,
       OPTIONS.extras[key] = value
     elif o in ("-m", "--platform_mode"):
       OPTIONS.platform_mode = a
-      print ('common: platform mode: %s ' % (OPTIONS.platform_mode))
+      print(('common: platform mode: %s ' % (OPTIONS.platform_mode)))
     else:
       if extra_option_handler is None or not extra_option_handler(o, a):
         assert False, "unknown option \"%s\"" % (o,)
@@ -965,8 +965,8 @@ class PasswordManager(object):
         current[i] = ""
 
       if not first:
-        print ("key file %s still missing some passwords." % (self.pwfile,))
-        answer = raw_input("try to edit again? [y]> ").strip()
+        print(("key file %s still missing some passwords." % (self.pwfile,)))
+        answer = input("try to edit again? [y]> ").strip()
         if answer and answer[0] not in 'yY':
           raise RuntimeError("key passwords unavailable")
       first = False
@@ -979,7 +979,7 @@ class PasswordManager(object):
     values.
     """
     result = {}
-    for k, v in sorted(current.iteritems()):
+    for k, v in sorted(current.items()):
       if v:
         result[k] = v
       else:
@@ -1000,7 +1000,7 @@ class PasswordManager(object):
     f.write("# (Additional spaces are harmless.)\n\n")
 
     first_line = None
-    sorted_list = sorted([(not v, k, v) for (k, v) in current.iteritems()])
+    sorted_list = sorted([(not v, k, v) for (k, v) in current.items()])
     for i, (_, k, v) in enumerate(sorted_list):
       f.write("[[[  %s  ]]] %s\n" % (v, k))
       if not v and first_line is None:
@@ -1025,13 +1025,13 @@ class PasswordManager(object):
           continue
         m = re.match(r"^\[\[\[\s*(.*?)\s*\]\]\]\s*(\S+)$", line)
         if not m:
-          print ("failed to parse password file: ", line)
+          print(("failed to parse password file: ", line))
         else:
           result[m.group(2)] = m.group(1)
       f.close()
     except IOError as e:
       if e.errno != errno.ENOENT:
-        print ("error reading password file: ", str(e))
+        print(("error reading password file: ", str(e)))
     return result
 
 
@@ -1135,7 +1135,7 @@ class DeviceSpecificParams(object):
     """Keyword arguments to the constructor become attributes of this
     object, which is passed to all functions in the device-specific
     module."""
-    for k, v in kwargs.items():
+    for k, v in list(kwargs.items()):
       setattr(self, k, v)
     self.extras = OPTIONS.extras
 
@@ -1152,7 +1152,7 @@ class DeviceSpecificParams(object):
           if x == ".py":
             f = b
           info = imp.find_module(f, [d])
-        print ("loaded device-specific extensions from", path)
+        print(("loaded device-specific extensions from", path))
         self.module = imp.load_module("device_specific", *info)
       except ImportError:
         print ("unable to load device-specific module; assuming none")
@@ -1297,8 +1297,8 @@ class Difference(object):
           th.join()
 
       if err or p.returncode != 0:
-        print ("WARNING: failure running %s:\n%s\n" % (
-            diff_program, "".join(err)))
+        print(("WARNING: failure running %s:\n%s\n" % (
+            diff_program, "".join(err))))
         self.patch = None
         return None, None, None
       diff = ptemp.read()
@@ -1320,7 +1320,7 @@ class Difference(object):
 
 def ComputeDifferences(diffs):
   """Call ComputePatch on all the Difference objects in 'diffs'."""
-  print (len(diffs), "diffs to compute")
+  print((len(diffs), "diffs to compute"))
 
   # Do the largest files first, to try and reduce the long-pole effect.
   by_size = [(i.tf.size, i) for i in diffs]
@@ -1350,10 +1350,10 @@ def ComputeDifferences(diffs):
         else:
           name = "%s (%s)" % (tf.name, sf.name)
         if patch is None:
-          print ("patching failed!                                  %s" % (name,))
+          print(("patching failed!                                  %s" % (name,)))
         else:
-          print ("%8.2f sec %8d / %8d bytes (%6.2f%%) %s" % (
-              dur, len(patch), tf.size, 100.0 * len(patch) / tf.size, name))
+          print(("%8.2f sec %8d / %8d bytes (%6.2f%%) %s" % (
+              dur, len(patch), tf.size, 100.0 * len(patch) / tf.size, name)))
       lock.release()
     except Exception as e:
       print (e)
@@ -1743,6 +1743,6 @@ fi
     if found:
       break
 
-  print ("putting script in", sh_location)
+  print(("putting script in", sh_location))
 
   output_sink(sh_location, sh)

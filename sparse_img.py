@@ -59,8 +59,8 @@ class SparseImage(object):
       raise ValueError("Chunk header size was expected to be 12, but is %u." %
                        (chunk_hdr_sz,))
 
-    print("Total of %u %u-byte output blocks in %u input chunks."
-          % (total_blks, blk_sz, total_chunks))
+    print(("Total of %u %u-byte output blocks in %u input chunks."
+          % (total_blks, blk_sz, total_chunks)))
 
     if not build_map:
       return
