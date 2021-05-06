@@ -5,10 +5,10 @@ block_cipher = None
 
 
 a = Analysis(['widget.py'],
-             pathex=['/home/user/Development/QtProjects/OTATool'],
-             binaries=[('deps/libdivsufsort.so', '.'), ('deps/bsdiff', '.'), ('deps/bspatch', '.'), ('deps/imgdiff', '.')],
+             pathex=['/home/vlad/Development/QtProjects/OTATool'],
+             binaries=[('deps/libdivsufsort.so', '.'), ('deps/libdivsufsort.so.1', '.'), ('deps/libdivsufsort.so.1.0.0', '.'), ('deps/bsdiff', '.'), ('deps/bspatch', '.'), ('deps/imgdiff', '.')],
              datas=[],
-             hiddenimports=[],
+             hiddenimports=['deps/libdivsufsort.so'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
