@@ -2,9 +2,9 @@ import sys
 from pathlib import Path
 
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QSpacerItem, QTextEdit
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QMessageBox, QDesktopWidget, QFileDialog
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QMessageBox, QDesktopWidget, QFileDialog, QDialog
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QStandardPaths, QSize, QFileInfo, QThread, QObject
+from PyQt5.QtCore import QStandardPaths, QSize, QFileInfo, QThread, QObject, QDir
 
 from ota_from_target_files import startBuildingIncrementalOta
 
@@ -96,26 +96,40 @@ class UiWidget(QWidget):
 
     def showDialogFirst(self):
 
-        temp = QFileDialog.getOpenFileName(self, 'Choose target file archive',
-               QStandardPaths.writableLocation(QStandardPaths.HomeLocation), "Zip archive (*.zip)")[0]
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        options |= QFileDialog.DontUseCustomDirectoryIcons
+        dialog = QFileDialog()
+        dialog.setOptions(options)
+        dialog.setFilter(dialog.filter() | QDir.Hidden)
 
-        if temp:
-            global first_tf_path
-            first_tf_path = temp
-            filename = Path(first_tf_path).name
-            self.first_tf_label.setText(filename)
+        if dialog.exec_() == QDialog.Accepted:
+
+            temp = dialog.selectedFiles()[0]
+            if temp:
+                global first_tf_path
+                first_tf_path = temp
+                filename = Path(first_tf_path).name
+                self.first_tf_label.setText(filename)
 
     def showDialogSecond(self):
 
-        temp = QFileDialog.getOpenFileName(self, 'Choose target file archive',
-               QStandardPaths.writableLocation(QStandardPaths.HomeLocation), "Zip archive (*.zip)")[0]
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        options |= QFileDialog.DontUseCustomDirectoryIcons
+        dialog = QFileDialog()
+        dialog.setOptions(options)
+        dialog.setFilter(dialog.filter() | QDir.Hidden)
 
-        if temp:
-            global second_tf_path
-            second_tf_path = temp
+        if dialog.exec_() == QDialog.Accepted:
 
-            filename = Path(second_tf_path).name
-            self.second_tf_label.setText(filename)
+            temp = dialog.selectedFiles()[0]
+            if temp:
+                global second_tf_path
+                second_tf_path = temp
+
+                filename = Path(second_tf_path).name
+                self.second_tf_label.setText(filename)
 
     def startButtonClicked(self):
 

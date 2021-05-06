@@ -6,7 +6,7 @@ block_cipher = None
 
 a = Analysis(['widget.py'],
              pathex=['/home/user/Development/QtProjects/OTATool'],
-             binaries=[('deps/libdivsufsort.so', 'lib')],
+             binaries=[('deps/libdivsufsort.so', '.'), ('deps/bsdiff', '.'), ('deps/bspatch', '.'), ('deps/imgdiff', '.')],
              datas=[],
              hiddenimports=[],
              hookspath=[],
@@ -31,4 +31,4 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=True )
+          console=False )
