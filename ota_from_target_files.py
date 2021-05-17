@@ -2395,12 +2395,10 @@ def main(argv):
 def startBuildingIncrementalOta(str):
     try:
         common.CloseInheritedPipes()
-        #print(str)
         main(str)
     except common.ExternalError as e:
         print()
         print(("   ERROR: %s" % (e,)))
         print()
-        sys.exit(1)
     finally:
         common.Cleanup()
